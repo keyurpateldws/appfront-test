@@ -43,7 +43,7 @@
     <div class="admin-container">
         <h1>Edit Product</h1>
 
-        @if ($errors->any())
+        {{-- @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
                     @foreach ($errors->all() as $error)
@@ -51,9 +51,9 @@
                     @endforeach
                 </ul>
             </div>
-        @endif
+        @endif --}}
 
-        <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="form-group">
@@ -67,25 +67,36 @@
             <div class="form-group">
                 <label for="description">Description</label>
                 <textarea id="description" name="description" class="form-control" required>{{ old('description', $product->description) }}</textarea>
+                @error('description')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group">
                 <label for="price">Price</label>
                 <input type="number" id="price" name="price" step="0.01" class="form-control" value="{{ old('price', $product->price) }}" required>
+                @error('price')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group">
                 <label for="image">Current Image</label>
-                @if($product->image)
-                    <img src="{{ asset($product->image) }}" class="product-image" alt="{{ $product->name }}">
+                @if ($product->image && $product->image !== 'product-placeholder.jpg')
+                    <img src="{{ asset('uploads/' . $product->image) }}" class="product-image" alt="{{ $product->name }}">
+                @else 
+                    <img src="{{ asset('product-placeholder.jpg') }}" class="product-image" alt="{{ $product->name }}">
                 @endif
                 <input type="file" id="image" name="image" class="form-control">
                 <small>Leave empty to keep current image</small>
+                @error('image')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Update Product</button>
-                <a href="{{ route('products.index') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>

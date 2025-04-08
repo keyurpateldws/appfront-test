@@ -39,7 +39,7 @@
     <div class="admin-container">
         <h1>Add New Product</h1>
 
-        @if ($errors->any())
+        {{-- @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
                     @foreach ($errors->all() as $error)
@@ -47,9 +47,9 @@
                     @endforeach
                 </ul>
             </div>
-        @endif
+        @endif --}}
 
-        <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="form-group">
                 <label for="name">Product Name</label>
@@ -61,23 +61,32 @@
 
             <div class="form-group">
                 <label for="description">Description</label>
-                <textarea id="description" name="description" class="form-control" required>{{ old('description') }}</textarea>
+                <textarea id="description" name="description" class="form-control"  required>{{ old('description') }}</textarea>
+                @error('description')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group">
                 <label for="price">Price</label>
                 <input type="number" id="price" name="price" step="0.01" class="form-control" value="{{ old('price') }}" required>
+                @error('price')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group">
                 <label for="image">Product Image</label>
                 <input type="file" id="image" name="image" class="form-control">
                 <small>Leave empty to use default image</small>
+                @error('image')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Add Product</button>
-                <a href="{{ route('products.index') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>

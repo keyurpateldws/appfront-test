@@ -53,7 +53,7 @@
         <div class="admin-header">
             <h1>Admin - Products</h1>
             <div>
-                <a href="{{ route('products.create') }}" class="btn btn-primary">Add New Product</a>
+                <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add New Product</a>
                 <a href="{{ route('logout') }}" class="btn btn-secondary">Logout</a>
             </div>
         </div>
@@ -79,17 +79,23 @@
                     <tr>
                         <td>{{ $product->id }}</td>
                         <td>
-                            @if ($product->image)
-                                <img src="{{ env('APP_URL') }}/{{ $product->image }}" width="50" height="50"
-                                    alt="{{ $product->name }}">
+                            @if ($product->image && $product->image !== 'product-placeholder.jpg')
+                                <img src="{{ asset('uploads/' . $product->image) }}" width="50" height="50" alt="{{ $product->name }}">
+                            @else
+                                <img src="{{ asset('product-placeholder.jpg') }}" width="50" height="50" alt="{{ $product->name }}">
                             @endif
                         </td>
                         <td>{{ $product->name }}</td>
                         <td>${{ number_format($product->price, 2) }}</td>
                         <td>
-                            <a href="{{ route('products.edit', $product->id) }}" class="btn btn-primary">Edit</a>
-                            <a href="{{ route('products.destroy', $product->id) }}" class="btn btn-secondary"
-                                onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
+                            <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-primary">Edit</a>
+                            <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this product?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-secondary">Delete</button>
+                            </form>
+                            {{-- <a href="{{ route('admin.products.destroy', $product->id) }}" class="btn btn-secondary"
+                                onclick="return confirm('Are you sure you want to delete this product?')">Delete</a> --}}
                         </td>
                     </tr>
                 @endforeach

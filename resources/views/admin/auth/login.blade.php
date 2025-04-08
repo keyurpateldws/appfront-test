@@ -57,17 +57,18 @@
     <div class="login-container">
         <h1>Admin Login</h1>
 
-        @if(session('error'))
+        @if ($errors->any())
             <div class="error-message">
-                {{ session('error') }}
+                {{ $errors->first() }}
             </div>
         @endif
 
-        <form action="{{ route('login.submit') }}" method="POST">            @csrf
+        <form action="{{ route('login.submit') }}" method="POST">            
+            @csrf
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" class="form-control"
-                       value="{{ app()->environment('local') ? 'test@example.com' : '' }}" required>
+                    value="{{ old('email', app()->environment('local') ? 'test@example.com' : '') }}" required>
             </div>
 
             <div class="form-group">
