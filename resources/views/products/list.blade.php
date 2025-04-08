@@ -30,7 +30,7 @@
             @forelse ($products as $product)
                 <div class="product-card">
                     @if ($product->image)
-                        <img src="{{ env('APP_URL') }}/{{ $product->image }}" class="product-image" alt="{{ $product->name }}">
+                        <img src="{{ asset($product->image) }}" class="product-image" alt="{{ $product->name }}">
                     @endif
                     <div class="product-info">
                         <h2 class="product-title">{{ $product->name }}</h2>

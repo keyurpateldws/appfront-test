@@ -27,7 +27,7 @@
         <div class="product-detail">
             <div>
                 @if ($product->image)
-                    <img src="{{ env('APP_URL') }}/{{ $product->image }}" class="product-detail-image">
+                    <img src="{{ asset($product->image) }}" class="product-detail-image">
                 @endif
             </div>
             <div class="product-detail-info">
