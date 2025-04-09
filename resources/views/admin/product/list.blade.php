@@ -45,6 +45,15 @@
             margin-bottom: 20px;
             border-radius: 4px;
         }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
     </style>
 </head>
 
@@ -61,6 +70,12 @@
         @if (session('success'))
             <div class="success-message">
                 {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="error-message">
+                {{ session('error') }}
             </div>
         @endif
 
@@ -88,15 +103,15 @@
                         <td>{{ $product->name }}</td>
                         <td>${{ number_format($product->price, 2) }}</td>
                         <td>
-                            <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-primary">Edit</a>
-                            <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this product?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-secondary">Delete</button>
-                            </form>
-                            {{-- <a href="{{ route('admin.products.destroy', $product->id) }}" class="btn btn-secondary"
-                                onclick="return confirm('Are you sure you want to delete this product?')">Delete</a> --}}
-                        </td>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-primary btn-md">Edit</a>
+                                <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this product?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-secondary btn-md">Delete</button>
+                                </form>
+                            </div>
+                        </td>                       
                     </tr>
                 @endforeach
             </tbody>

@@ -44,6 +44,11 @@ class UpdateProduct extends Command
         $id = $this->argument('id');
         $product = Product::find($id);
 
+        if (!$product) {
+            $this->error("Product with ID {$id} not found.");
+            return 1;
+        }
+        
         $data = [];
         if ($this->option('name')) {
             $data['name'] = $this->option('name');
@@ -62,7 +67,6 @@ class UpdateProduct extends Command
         if ($this->option('price')) {
             $data['price'] = $this->option('price');
         }
-
 
         $oldPrice = $product->price;
 

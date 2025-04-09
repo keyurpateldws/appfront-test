@@ -10,6 +10,7 @@ use App\Services\ImageUploadService;
 use App\Jobs\SendPriceChangeNotification;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
 use App\Http\Requests\Admin\Product\UpdateProductRequest;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProductController extends Controller
 {
@@ -81,6 +82,8 @@ class ProductController extends Controller
         try {
             $product = $this->product->findOrFail($id);
             return view('admin.product.edit', compact('product'));
+        }catch (ModelNotFoundException $e) {
+            return redirect()->route('admin.products.index')->with('error', 'Product not found');
         } catch (\Exception $e) {
             Log::error('Failed to load edit product form: ' . $e->getMessage());
             return redirect()->route('admin.products.index')->with('error', 'Unable to load the edit form.');
@@ -109,6 +112,8 @@ class ProductController extends Controller
             }
 
             return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('admin.products.index')->with('error', 'Product not found');
         } catch (\Exception $e) {
             Log::error('Failed to update product: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Unable to update product. Please try again.');
@@ -128,6 +133,8 @@ class ProductController extends Controller
             $product->delete();
 
             return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully');
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('admin.products.index')->with('error', 'Product not found');
         } catch (\Exception $e) {
             Log::error('Failed to delete product: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Unable to delete product. Please try again.');
