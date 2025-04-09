@@ -26,6 +26,5 @@ Route::controller(LoginController::class)->group(function () {
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
-    Route::resource('products', AdminProductController::class);
+    Route::resource('products', AdminProductController::class)->except('show');
 });
-

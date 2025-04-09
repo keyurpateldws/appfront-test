@@ -14,12 +14,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProductController extends Controller
 {
-    protected $product;
     protected $imageUploadService;
 
-    public function __construct(Product $product, ImageUploadService $imageUploadService)
+    public function __construct(ImageUploadService $imageUploadService)
     {
-        $this->product = $product;
         $this->imageUploadService = $imageUploadService;
     }
 
@@ -28,13 +26,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        try {
-            $products = $this->product->all();            
-            return view('admin.product.list', compact('products'));
-        } catch (\Exception $e) {
-            Log::error('Failed to load products: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Unable to load products. Please try again later.');
-        }
+        $products = Product::all();            
+        return view('admin.product.list', compact('products'));
     }
 
     /**
@@ -42,12 +35,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        try {
-            return view('admin.product.create');
-        } catch (\Exception $e) {
-            Log::error('Failed to load create product form: ' . $e->getMessage());
-            return redirect()->route('admin.products.index')->with('error', 'Unable to load the create form.');
-        }
+        return view('admin.product.create');
     }
 
     /**
@@ -55,39 +43,19 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        try {
-            $data = $request->validated();
-            $data['image'] = $this->imageUploadService->uploadImage($request->file('image'));
+        $data = $request->validated();
+        $data['image'] = $this->imageUploadService->uploadImage($request->file('image'));
 
-            $product = $this->product->create($data);
-            return redirect()->route('admin.products.index')->with('success', 'Product added successfully');
-        } catch (\Exception $e) {
-            Log::error('Failed to store product: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Unable to add product. Please try again.');
-        }
-    }
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
+        $product = Product::create($data);
+        return redirect()->route('admin.products.index')->with('success', 'Product added successfully');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Product $product)
     {
-        try {
-            $product = $this->product->findOrFail($id);
-            return view('admin.product.edit', compact('product'));
-        }catch (ModelNotFoundException $e) {
-            return redirect()->route('admin.products.index')->with('error', 'Product not found');
-        } catch (\Exception $e) {
-            Log::error('Failed to load edit product form: ' . $e->getMessage());
-            return redirect()->route('admin.products.index')->with('error', 'Unable to load the edit form.');
-        }
+        return view('admin.product.edit', compact('product'));
     }
 
     /**
@@ -123,21 +91,14 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Product $product)
     {
-        try {
-            $product = $this->product->findOrFail($id);
-            if ($product->image && $product->image !== 'product-placeholder.jpg') {
-                $this->imageUploadService->deleteImage(basename($product->image));
-            }
-            $product->delete();
-
-            return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully');
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('admin.products.index')->with('error', 'Product not found');
-        } catch (\Exception $e) {
-            Log::error('Failed to delete product: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Unable to delete product. Please try again.');
+        if ($product->image && $product->image !== 'product-placeholder.jpg') {
+            $this->imageUploadService->deleteImage(basename($product->image));
         }
+
+        $product->delete();
+
+        return redirect()->back()->with('success', 'Product deleted successfully');
     }
 }
