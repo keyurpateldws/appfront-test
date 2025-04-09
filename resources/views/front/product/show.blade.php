@@ -26,8 +26,10 @@
     <div class="container">
         <div class="product-detail">
             <div>
-                @if ($product->image)
-                    <img src="{{ asset($product->image) }}" class="product-detail-image">
+                @if ($product->image && $product->image !== 'product-placeholder.jpg')
+                    <img src="{{ asset('storage/uploads/' . $product->image) }}" class="product-detail-image">
+                @else 
+                    <img src="{{ asset('product-placeholder.jpg') }}" class="product-detail-image">
                 @endif
             </div>
             <div class="product-detail-info">

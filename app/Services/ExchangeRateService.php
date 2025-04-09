@@ -34,6 +34,6 @@ class ExchangeRateService
         } catch (\Exception $e) {
             Log::error('Failed to fetch exchange rate: ' . $e->getMessage());
         }
-        return env('EXCHANGE_RATE', 0.85);
+        return config('app.exchange_rate');
     }
 }

@@ -41,9 +41,12 @@
         <div class="products-grid">
             @forelse ($products as $product)
                 <div class="product-card">
-                    @if ($product->image)
-                        <img src="{{ asset($product->image) }}" class="product-image" alt="{{ $product->name }}">
+                    @if ($product->image && $product->image !== 'product-placeholder.jpg')
+                        <img src="{{ asset('storage/uploads/' . $product->image) }}" class="product-image">
+                    @else 
+                        <img src="{{ asset('product-placeholder.jpg') }}" class="product-image">
                     @endif
+
                     <div class="product-info">
                         <h2 class="product-title">{{ $product->name }}</h2>
                         <p class="product-description">{{ Str::limit($product->description, 100) }}</p>

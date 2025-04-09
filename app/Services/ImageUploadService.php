@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ImageUploadService
 {
@@ -16,39 +17,34 @@ class ImageUploadService
         $this->defaultImage = $defaultImage;
     }
 
-    public function uploadImage(UploadedFile $file = null, ?string $currentImage = null, ?string $customPath = null): string
+    public function uploadImage(UploadedFile $file = null, ?string $currentImage = null): string
     {
         if (!$file) {
             return $currentImage ?? $this->defaultImage;
         }
 
         try {
-            $path = $customPath ?? $this->uploadPath;
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path($path), $filename);
+            $path = $file->storeAs($this->uploadPath, $filename, 'public');
 
-            // Delete old image if it exists and is not the default
+            // Delete old image if exists and not default
             if ($currentImage && $currentImage !== $this->defaultImage) {
-                $oldImagePath = public_path($path . '/' . $currentImage);
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
+                $this->deleteImage($currentImage);
             }
 
-            return $filename;
+            return basename($path);
         } catch (\Exception $e) {
             Log::error('Image upload failed: ' . $e->getMessage());
             return $currentImage ?? $this->defaultImage;
         }
     }
 
-    public function deleteImage(string $filename, ?string $customPath = null)
+    public function deleteImage(string $filename)
     {
         if ($filename && $filename !== $this->defaultImage) {
-            $path = $customPath ?? $this->uploadPath;
-            $imagePath = public_path($path . '/' . $filename);
-            if (file_exists($imagePath)) {
-                unlink($imagePath);
+            $filePath = $this->uploadPath . '/' . $filename;
+            if (Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
             }
         }
     }

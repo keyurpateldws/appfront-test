@@ -95,7 +95,7 @@
                         <td>{{ $product->id }}</td>
                         <td>
                             @if ($product->image && $product->image !== 'product-placeholder.jpg')
-                                <img src="{{ asset('uploads/' . $product->image) }}" width="50" height="50" alt="{{ $product->name }}">
+                                <img src="{{ asset('storage/uploads/' . $product->image) }}" width="50" height="50" alt="{{ $product->name }}">
                             @else
                                 <img src="{{ asset('product-placeholder.jpg') }}" width="50" height="50" alt="{{ $product->name }}">
                             @endif

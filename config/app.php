@@ -123,4 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'exchange_rate' => env('EXCHANGE_RATE', 0.85),
+
+    'price_notification_email' => env('PRICE_NOTIFICATION_EMAIL', 'admin@example.com'),
+    
 ];

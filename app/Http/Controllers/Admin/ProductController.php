@@ -103,7 +103,7 @@ class ProductController extends Controller
             $product->update($data);
 
             if ($oldPrice != $product->price) {
-                $notificationEmail = env('PRICE_NOTIFICATION_EMAIL', 'admin@example.com');
+                $notificationEmail = config('app.price_notification_email');
                 try {
                     SendPriceChangeNotification::dispatch($product, $oldPrice, $product->price, $notificationEmail);
                 } catch (\Exception $e) {
