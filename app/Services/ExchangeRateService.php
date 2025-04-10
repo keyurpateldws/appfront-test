@@ -4,36 +4,29 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class ExchangeRateService
 {
     public function getRate(string $from = 'USD', string $to = 'EUR'): float
     {
         try {
-            $curl = curl_init();
+            $response = Http::timeout(5)
+                ->get("https://open.er-api.com/v6/latest/$from");
 
-            curl_setopt_array($curl, [
-                CURLOPT_URL => "https://open.er-api.com/v6/latest/$from",
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => 5,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "GET",
-            ]);
+            if ($response->successful()) {
+                $data = $response->json();
 
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-
-            curl_close($curl);
-
-            if (!$err) {
-                $data = json_decode($response, true);
                 if (isset($data['rates'][$to])) {
                     return $data['rates'][$to];
                 }
+            } else {
+                Log::warning('Exchange rate API request failed with status: ' . $response->status());
             }
         } catch (\Exception $e) {
             Log::error('Failed to fetch exchange rate: ' . $e->getMessage());
         }
-        return config('app.exchange_rate');
+
+        return config('app.exchange_rate', 0.85); 
     }
 }
