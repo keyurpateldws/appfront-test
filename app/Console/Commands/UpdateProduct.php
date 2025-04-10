@@ -53,12 +53,15 @@ class UpdateProduct extends Command
         $data = [];
         if ($this->option('name')) {
             $data['name'] = $this->option('name');
-            if (empty($data['name']) || trim($data['name']) == '') {
-                $this->error("Name cannot be empty.");
-                return 1;
-            }
-            if (strlen($data['name']) < 3) {
-                $this->error("Name must be at least 3 characters long.");
+            $validator = Validator::make(
+                ['name' => $this->option('name')],
+                ['name' => 'required|min:3']
+            );
+
+            if ($validator->fails()) {
+                foreach ($validator->errors()->all() as $error) {
+                    $this->error($error);
+                }
                 return 1;
             }
         }
@@ -67,13 +70,23 @@ class UpdateProduct extends Command
         }
         if ($this->option('price')) {
             $data['price'] = $this->option('price');
+            $validator = Validator::make(
+                ['price' => $this->option('price')],
+                ['price' => 'required|numeric|min:0']
+            );
+
+            if ($validator->fails()) {
+                foreach ($validator->errors()->all() as $error) {
+                    $this->error($error);
+                }
+                return 1;
+            }
         }
 
         $oldPrice = $product->price;
 
         if (!empty($data)) {
             $product->update($data);
-            $product->save();
             Cache::forget('admin_products_all');
             Cache::forget('front_products_all');
             $this->info("Product updated successfully.");
