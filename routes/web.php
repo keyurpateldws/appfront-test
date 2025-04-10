@@ -19,9 +19,9 @@ Route::controller(ProductController::class)->name('front.products.')->group(func
 
 // Auth Routes
 Route::controller(LoginController::class)->group(function () {
-    Route::get('/login', 'showLoginForm')->name('login');
-    Route::post('/login', 'login')->name('login.submit');
-    Route::get('/logout', 'logout')->name('logout');
+    Route::get('/login', 'showLoginForm')->name('login')->middleware('guest');
+    Route::post('/login', 'login')->name('login.submit')->middleware('guest');
+    Route::get('/logout', 'logout')->name('logout')->middleware('auth');
 });
 
 // Admin Routes

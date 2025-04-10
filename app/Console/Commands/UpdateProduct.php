@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
 use App\Jobs\SendPriceChangeNotification;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class UpdateProduct extends Command
@@ -43,12 +44,12 @@ class UpdateProduct extends Command
     {
         $id = $this->argument('id');
         $product = Product::find($id);
-        
+
         if (!$product) {
             $this->error("Product with ID {$id} not found.");
             return 1;
         }
-        
+
         $data = [];
         if ($this->option('name')) {
             $data['name'] = $this->option('name');
@@ -73,7 +74,8 @@ class UpdateProduct extends Command
         if (!empty($data)) {
             $product->update($data);
             $product->save();
-            refreshCaches();
+            Cache::forget('admin_products_all');
+            Cache::forget('front_products_all');
             $this->info("Product updated successfully.");
             // Check if price has changed
             if (isset($data['price']) && $oldPrice != $product->price) {

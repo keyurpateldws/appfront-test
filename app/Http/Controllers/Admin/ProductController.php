@@ -51,7 +51,7 @@ class ProductController extends Controller
         }
 
         $product = Product::create($data);
-        refreshCaches();
+        $this->refreshCaches();
 
         return redirect()->route('admin.products.index')->with('success', 'Product added successfully');
     }
@@ -85,7 +85,7 @@ class ProductController extends Controller
                 }
             }
 
-            refreshCaches();
+            $this->refreshCaches();
             return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
         } catch (ModelNotFoundException $e) {
             Log::warning('Product not found for update: ' . $e->getMessage());
@@ -107,11 +107,19 @@ class ProductController extends Controller
             }
 
             $product->delete();
-            refreshCaches();
+            $this->refreshCaches();
             return redirect()->back()->with('success', 'Product deleted successfully');
         } catch (\Exception $e) {
             Log::error('Failed to delete product: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Unable to delete product. Please try again.');
         }
+    }
+    protected function refreshCaches() {
+        try {
+			Cache::forget('admin_products_all');
+			Cache::forget('front_products_all');
+		} catch (\Exception $e) {
+			Log::error('Failed to refresh caches: ' . $e->getMessage());
+		}
     }
 }
