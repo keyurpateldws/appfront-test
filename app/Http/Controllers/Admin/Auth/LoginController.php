@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -14,37 +15,21 @@ class LoginController extends Controller
         return view('admin.auth.login');
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        try {
-            $credentials = $request->validate([
-                'email' => ['required', 'email'],
-                'password' => ['required'],
-            ]);
+        $credentials = $request->validated();
 
-            if (Auth::attempt($credentials)) {
-                return redirect()->route('admin.products.index');
-            }
-
-            return back()->withErrors([
-                'email' => 'Invalid login credentials',
-            ])->withInput();
-        } catch (\Exception $e) {
-            Log::error('Failed to process login: ' . $e->getMessage());
-            return back()->withErrors([
-                'email' => 'An error occurred during login. Please try again.',
-            ])->withInput();
+        if (Auth::attempt($credentials)) {
+            return redirect()->route('admin.products.index');
         }
+        return back()
+            ->withErrors(['email' => 'Invalid login credentials'])
+            ->withInput();
     }
 
     public function logout()
     {
-        try {
-            Auth::logout();
-            return redirect()->route('login');
-        } catch (\Exception $e) {
-            Log::error('Failed to logout: ' . $e->getMessage());
-            return redirect()->route('login')->with('error', 'Unable to logout. Please try again.');
-        }
+        Auth::logout();
+        return redirect()->route('login');
     }
 }

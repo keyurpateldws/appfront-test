@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,26 +12,25 @@
             flex-direction: column;
             margin-bottom: 1rem;
         }
+
         .price-usd {
             font-size: 2rem;
             font-weight: bold;
             color: #e74c3c;
         }
+
         .price-eur {
             font-size: 1.5rem;
             color: #7f8c8d;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="product-detail">
             <div>
-                @if ($product->image && $product->image !== 'product-placeholder.jpg')
-                    <img src="{{ asset('storage/uploads/' . $product->image) }}" class="product-detail-image">
-                @else 
-                    <img src="{{ asset('product-placeholder.jpg') }}" class="product-detail-image">
-                @endif
+                <img src="{{ $product->image_url }}" class="product-detail-image">
             </div>
             <div class="product-detail-info">
                 <h1 class="product-detail-title">{{ $product->name }}</h1>
@@ -60,4 +60,5 @@
         </div>
     </div>
 </body>
+
 </html>

@@ -43,15 +43,6 @@
     <div class="admin-container">
         <h1>Edit Product</h1>
 
-        {{-- @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif --}}
 
         <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -80,13 +71,10 @@
                 @enderror
             </div>
 
+            
             <div class="form-group">
                 <label for="image">Current Image</label>
-                @if ($product->image && $product->image !== 'product-placeholder.jpg')
-                    <img src="{{ asset('storage/uploads/' . $product->image) }}" class="product-image" alt="{{ $product->name }}">
-                @else 
-                    <img src="{{ asset('product-placeholder.jpg') }}" class="product-image" alt="{{ $product->name }}">
-                @endif
+                    <img src="{{ $product->image_url }}" class="product-image" alt="{{ $product->name }}">
                 <input type="file" id="image" name="image" class="form-control">
                 <small>Leave empty to keep current image</small>
                 @error('image')

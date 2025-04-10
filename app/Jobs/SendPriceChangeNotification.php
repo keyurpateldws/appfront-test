@@ -47,6 +47,5 @@ class SendPriceChangeNotification implements ShouldQueue
                     $this->oldPrice,
                     $this->newPrice
                 ));
-
     }
 }

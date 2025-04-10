@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,11 +12,13 @@
             flex-direction: column;
             margin-bottom: 1rem;
         }
+
         .price-usd {
             font-size: 1.5rem;
             font-weight: bold;
             color: #e74c3c;
         }
+
         .price-eur {
             font-size: 1.2rem;
             color: #7f8c8d;
@@ -30,6 +33,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Products</h1>
@@ -41,12 +45,7 @@
         <div class="products-grid">
             @forelse ($products as $product)
                 <div class="product-card">
-                    @if ($product->image && $product->image !== 'product-placeholder.jpg')
-                        <img src="{{ asset('storage/uploads/' . $product->image) }}" class="product-image">
-                    @else 
-                        <img src="{{ asset('product-placeholder.jpg') }}" class="product-image">
-                    @endif
-
+                    <img src="{{ $product->image_url }}" class="product-image">
                     <div class="product-info">
                         <h2 class="product-title">{{ $product->name }}</h2>
                         <p class="product-description">{{ Str::limit($product->description, 100) }}</p>
@@ -54,7 +53,8 @@
                             <span class="price-usd">${{ number_format($product->price, 2) }}</span>
                             <span class="price-eur">€{{ number_format($product->price * $exchangeRate, 2) }}</span>
                         </div>
-                        <a href="{{ route('front.products.show', $product->id) }}" class="btn btn-primary">View Details</a>
+                        <a href="{{ route('front.products.show', $product->id) }}" class="btn btn-primary">View
+                            Details</a>
                     </div>
                 </div>
             @empty
@@ -69,4 +69,5 @@
         </div>
     </div>
 </body>
+
 </html>

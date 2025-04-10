@@ -7,28 +7,45 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Services\ExchangeRateService;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
-    protected $exchangeRate;
 
-    public function __construct(ExchangeRateService $exchangeRate)
-    {
-        $this->exchangeRate = $exchangeRate;
-    }
-    
+    public function __construct(protected ExchangeRateService $exchangeRate) {}
+
     public function index()
     {
-        $products = Product::all();
-        $exchangeRate = $this->exchangeRate->getRate();
+        try {
+            $products = Cache::remember('front_products_all', 3600, function () {
+                return Product::all(); // Could later be Product::where('active', true)->get()
+            });
 
-        return view('front.product.list', compact('products', 'exchangeRate'));
+            $exchangeRate = $this->exchangeRate->getRate();
+
+            return view('front.product.list', compact('products', 'exchangeRate'));
+        } catch (\Exception $e) {
+            Log::error('Failed to load product index', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->route('front.products.index')->with('error', 'Unable to load products. Please try again later.');
+        }
     }
 
     public function show(Product $product)
     {
-        
-        $exchangeRate = $this->exchangeRate->getRate();
-        return view('front.product.show', compact('product', 'exchangeRate'));
+        try {
+            $exchangeRate = $this->exchangeRate->getRate();
+            return view('front.product.show', compact('product', 'exchangeRate'));
+        } catch (\Exception $e) {
+            Log::error('Failed to load product details', [
+                'product_id' => $product->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->route('front.products.index')->with('error', 'Unable to load product details. Please try again.');
+        }
     }
 }

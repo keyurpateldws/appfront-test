@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateProductRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class UpdateProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return Auth::check();
     }
 
     /**
@@ -26,6 +27,17 @@ class UpdateProductRequest extends FormRequest
             'description' => 'nullable|string',
             'price'       => 'required|numeric|min:0',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ];
+    }
+    public function messages(): array
+    {
+        return [
+            'name.min' => 'The product name must be at least 3 characters.',
+            'price.numeric' => 'The price must be a number.',
+            'price.min' => 'The price cannot be negative.',
+            'image.image' => 'The uploaded file must be an image.',
+            'image.mimes' => 'Only JPG, JPEG, PNG, and WEBP formats are supported.',
+            'image.max' => 'The image must not exceed 2MB.',
         ];
     }
 }

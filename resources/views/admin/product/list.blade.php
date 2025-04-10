@@ -53,7 +53,6 @@
             margin-bottom: 20px;
             border-radius: 4px;
         }
-        
     </style>
 </head>
 
@@ -94,24 +93,24 @@
                     <tr>
                         <td>{{ $product->id }}</td>
                         <td>
-                            @if ($product->image && $product->image !== 'product-placeholder.jpg')
-                                <img src="{{ asset('storage/uploads/' . $product->image) }}" width="50" height="50" alt="{{ $product->name }}">
-                            @else
-                                <img src="{{ asset('product-placeholder.jpg') }}" width="50" height="50" alt="{{ $product->name }}">
-                            @endif
+                            <img src="{{ $product->image_url }}" width="50" height="50"
+                                alt="{{ $product->name }}">
                         </td>
                         <td>{{ $product->name }}</td>
                         <td>${{ number_format($product->price, 2) }}</td>
                         <td>
                             <div style="display: flex; gap: 8px; align-items: center;">
-                                <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-primary btn-md">Edit</a>
-                                <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this product?')">
+                                <a href="{{ route('admin.products.edit', $product->id) }}"
+                                    class="btn btn-primary btn-md">Edit</a>
+                                <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST"
+                                    style="display: inline;"
+                                    onsubmit="return confirm('Are you sure you want to delete this product?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-secondary btn-md">Delete</button>
                                 </form>
                             </div>
-                        </td>                       
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

@@ -43,7 +43,7 @@ class UpdateProduct extends Command
     {
         $id = $this->argument('id');
         $product = Product::find($id);
-
+        
         if (!$product) {
             $this->error("Product with ID {$id} not found.");
             return 1;
@@ -73,9 +73,8 @@ class UpdateProduct extends Command
         if (!empty($data)) {
             $product->update($data);
             $product->save();
-
+            refreshCaches();
             $this->info("Product updated successfully.");
-
             // Check if price has changed
             if (isset($data['price']) && $oldPrice != $product->price) {
                 $this->info("Price changed from {$oldPrice} to {$product->price}.");

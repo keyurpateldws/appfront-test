@@ -11,22 +11,20 @@ use App\Jobs\SendPriceChangeNotification;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
 use App\Http\Requests\Admin\Product\UpdateProductRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
-    protected $imageUploadService;
-
-    public function __construct(ImageUploadService $imageUploadService)
-    {
-        $this->imageUploadService = $imageUploadService;
-    }
+    public function __construct(protected ImageUploadService $imageUploadService) {}
 
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $products = Product::all();            
+        $products = Cache::remember('admin_products_all', 3600, function () {
+            return Product::all();
+        });
         return view('admin.product.list', compact('products'));
     }
 
@@ -44,9 +42,17 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         $data = $request->validated();
-        $data['image'] = $this->imageUploadService->uploadImage($request->file('image'));
+
+        try {
+            $data['image'] = $this->imageUploadService->uploadImage($request->file('image'));
+        } catch (\Exception $e) {
+            Log::error('Failed to create product: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to create product. Please try again.');
+        }
 
         $product = Product::create($data);
+        refreshCaches();
+
         return redirect()->route('admin.products.index')->with('success', 'Product added successfully');
     }
 
@@ -79,9 +85,11 @@ class ProductController extends Controller
                 }
             }
 
+            refreshCaches();
             return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('admin.products.index')->with('error', 'Product not found');
+            Log::warning('Product not found for update: ' . $e->getMessage());
+            return redirect()->route('admin.products.index')->with('error', 'Product not found.');
         } catch (\Exception $e) {
             Log::error('Failed to update product: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Unable to update product. Please try again.');
@@ -93,12 +101,17 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        if ($product->image && $product->image !== 'product-placeholder.jpg') {
-            $this->imageUploadService->deleteImage(basename($product->image));
+        try {
+            if ($product->image && $product->image !== 'product-placeholder.jpg') {
+                $this->imageUploadService->deleteImage(basename($product->image));
+            }
+
+            $product->delete();
+            refreshCaches();
+            return redirect()->back()->with('success', 'Product deleted successfully');
+        } catch (\Exception $e) {
+            Log::error('Failed to delete product: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to delete product. Please try again.');
         }
-
-        $product->delete();
-
-        return redirect()->back()->with('success', 'Product deleted successfully');
     }
 }
