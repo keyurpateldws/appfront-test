@@ -108,6 +108,6 @@ class ProductSeeder extends Seeder
         // Insert products into the database
         Product::insert($products);
         $this->command->info('10 sample products seeded successfully!');
-        Product::factory()->count(2000)->create();
+        // Product::factory()->count(2000)->create();
     }
 }
