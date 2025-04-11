@@ -17,9 +17,7 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            $products = Cache::remember('front_products_all', 3600, function () {
-                return Product::all(); // Could later be Product::where('active', true)->get()
-            });
+            $products = Product::all();
 
             $exchangeRate = $this->exchangeRate->getRate();
 

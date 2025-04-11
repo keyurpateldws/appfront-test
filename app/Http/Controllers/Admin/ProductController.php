@@ -22,9 +22,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Cache::remember('admin_products_all', 3600, function () {
-            return Product::all();
-        });
+        $products = Product::all();
         return view('admin.product.list', compact('products'));
     }
 
@@ -50,8 +48,7 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Unable to create product. Please try again.');
         }
 
-        $product = Product::create($data);
-        $this->refreshCaches();
+        Product::create($data);
 
         return redirect()->route('admin.products.index')->with('success', 'Product added successfully');
     }
@@ -69,31 +66,22 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        try {
-            $oldPrice = $product->price;
-            $data = $request->validated();
-            $data['image'] = $this->imageUploadService->uploadImage($request->file('image'), $product->image);
+        $oldPrice = $product->price;
+        $data = $request->validated();
+        $data['image'] = $this->imageUploadService->uploadImage($request->file('image'), $product->image);
 
-            $product->update($data);
+        $product->update($data);
 
-            if ($oldPrice != $product->price) {
-                $notificationEmail = config('app.price_notification_email');
-                try {
-                    SendPriceChangeNotification::dispatch($product, $oldPrice, $product->price, $notificationEmail);
-                } catch (\Exception $e) {
-                    Log::error('Failed to dispatch price change notification: ' . $e->getMessage());
-                }
+        if ($oldPrice != $product->price) {
+            $notificationEmail = config('app.price_notification_email');
+            try {
+                SendPriceChangeNotification::dispatch($product, $oldPrice, $product->price, $notificationEmail);
+            } catch (\Exception $e) {
+                Log::error('Failed to dispatch price change notification: ' . $e->getMessage());
             }
-
-            $this->refreshCaches();
-            return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
-        } catch (ModelNotFoundException $e) {
-            Log::warning('Product not found for update: ' . $e->getMessage());
-            return redirect()->route('admin.products.index')->with('error', 'Product not found.');
-        } catch (\Exception $e) {
-            Log::error('Failed to update product: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Unable to update product. Please try again.');
         }
+
+        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
     }
 
     /**
@@ -101,25 +89,11 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        try {
-            if ($product->image && $product->image !== 'product-placeholder.jpg') {
-                $this->imageUploadService->deleteImage(basename($product->image));
-            }
-
-            $product->delete();
-            $this->refreshCaches();
-            return redirect()->back()->with('success', 'Product deleted successfully');
-        } catch (\Exception $e) {
-            Log::error('Failed to delete product: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Unable to delete product. Please try again.');
+        if ($product->image && $product->image !== 'product-placeholder.jpg') {
+            $this->imageUploadService->deleteImage(basename($product->image));
         }
-    }
-    protected function refreshCaches() {
-        try {
-			Cache::forget('admin_products_all');
-			Cache::forget('front_products_all');
-		} catch (\Exception $e) {
-			Log::error('Failed to refresh caches: ' . $e->getMessage());
-		}
+
+        $product->delete();
+        return redirect()->back()->with('success', 'Product deleted successfully');
     }
 }

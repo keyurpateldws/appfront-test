@@ -3,11 +3,9 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\Product;
+use App\Commands\UpdateProductCommand;
+use App\Contracts\CommandBus;
 use Illuminate\Support\Facades\Validator;
-use App\Jobs\SendPriceChangeNotification;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class UpdateProduct extends Command
 {
@@ -30,8 +28,9 @@ class UpdateProduct extends Command
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct(
+        protected CommandBus $commandBus
+    ) {
         parent::__construct();
     }
 
@@ -43,21 +42,14 @@ class UpdateProduct extends Command
     public function handle()
     {
         $id = $this->argument('id');
-        $product = Product::find($id);
-
-        if (!$product) {
-            $this->error("Product with ID {$id} not found.");
-            return 1;
-        }
-
-        $data = [];
+        
+        // Validate name if provided
         if ($this->option('name')) {
-            $data['name'] = $this->option('name');
             $validator = Validator::make(
                 ['name' => $this->option('name')],
                 ['name' => 'required|min:3']
             );
-
+            
             if ($validator->fails()) {
                 foreach ($validator->errors()->all() as $error) {
                     $this->error($error);
@@ -65,52 +57,21 @@ class UpdateProduct extends Command
                 return 1;
             }
         }
-        if ($this->option('description')) {
-            $data['description'] = $this->option('description');
-        }
-        if ($this->option('price')) {
-            $data['price'] = $this->option('price');
-            $validator = Validator::make(
-                ['price' => $this->option('price')],
-                ['price' => 'required|numeric|min:0']
+
+        try {
+            $command = new UpdateProductCommand(
+                id: (int) $id,
+                name: $this->option('name'),
+                description: $this->option('description'),
+                price: $this->option('price') ? (float) $this->option('price') : null
             );
 
-            if ($validator->fails()) {
-                foreach ($validator->errors()->all() as $error) {
-                    $this->error($error);
-                }
-                return 1;
-            }
-        }
-
-        $oldPrice = $product->price;
-
-        if (!empty($data)) {
-            $product->update($data);
-            Cache::forget('admin_products_all');
-            Cache::forget('front_products_all');
+            $this->commandBus->dispatch($command);
             $this->info("Product updated successfully.");
-            // Check if price has changed
-            if (isset($data['price']) && $oldPrice != $product->price) {
-                $this->info("Price changed from {$oldPrice} to {$product->price}.");
-
-                $notificationEmail = config('app.price_notification_email');
-
-                try {
-                    SendPriceChangeNotification::dispatch(
-                        $product,
-                        $oldPrice,
-                        $product->price,
-                        $notificationEmail
-                    );
-                    $this->info("Price change notification dispatched to {$notificationEmail}.");
-                } catch (\Exception $e) {
-                    $this->error("Failed to dispatch price change notification: " . $e->getMessage());
-                }
-            }
-        } else {
-            $this->info("No changes provided. Product remains unchanged.");
+            return 0;
+        } catch (\Exception $e) {
+            $this->error("Failed to update product: " . $e->getMessage());
+            return 1;
         }
-        return 0;
     }
 }
