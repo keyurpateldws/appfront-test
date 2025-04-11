@@ -11,16 +11,6 @@ This document outlines the recent code refactoring and improvements made to enha
 To run the project locally, use the following commands:
 
 ```bash
-# Install dependencies
-composer install
-npm install
-
-# Set up environment
-cp .env.example .env
-php artisan key:generate
-
-# Run migrations
-php artisan migrate
 
 # Start the development servers
 php artisan queue:work & php artisan serve
