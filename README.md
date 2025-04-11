@@ -11,6 +11,18 @@ This document outlines the recent code refactoring and improvements made to enha
 To run the project locally, use the following commands:
 
 ```bash
+# Install dependencies
+composer install
+npm install
+
+# Set up environment
+cp .env.example .env
+php artisan key:generate
+
+# Run migrations
+php artisan migrate
+
+# Start the development servers
 php artisan queue:work & php artisan serve
 ```
 
@@ -30,7 +42,6 @@ The product update functionality has been refactored using the Command Bus patte
    - Features:
      - Input validation
      - Price change detection
-     - Cache refresh
      - Price change notifications
 
 3. **Command Bus**
@@ -95,7 +106,6 @@ Updated all models to follow Laravel's latest standards:
 - Enhanced error handling and prevention of crashes
 - Implemented proper logging for debugging
 
-
 ## 📝 Usage Examples
 
 ### Command Line Interface
@@ -117,13 +127,27 @@ php artisan product:update 1 --name="New Name" --description="New Description" -
 - Proper authentication and authorization
 
 ## 📈 Future Improvements
-- API documentation using OpenAPI/Swagger
-- Unit and feature test coverage
-- CI/CD pipeline implementation
-- Monitoring and logging improvements
-- Caching System
+- Implementation of GraphQL API
+- Microservices architecture adoption
+- Serverless deployment options
+- AI/ML integration for product recommendations
+- Progressive Web App (PWA) features
+- Augmented Reality product visualization
+- Advanced analytics dashboard
+- Automated deployment pipeline
 
-### 🔄 Domain Driven Design (DDD) Considerations
+## 🛡️ Security Enhancements (future)
+- OAuth2 implementation
+- Two-factor authentication
+- IP-based access control
+- Security scanning integration
+- Automated security updates
+- Penetration testing setup
+- Security headers configuration
+- Content Security Policy (CSP)
+- SQL injection prevention
+
+## 🔄 Domain Driven Design (DDD) Considerations
 For complex or enterprise-level applications:
 - Domain layer separation
 - Bounded contexts
